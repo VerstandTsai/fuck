@@ -12,7 +12,11 @@ void printhelp() {
 }
 
 void printver() {
-    printf("fuck 1.0.0\n");
+    printf(
+            "fuck 1.0.0\n"
+            "A Brainfuck compiler.\n"
+            "Made by VerstandTsai.\n"
+    );
 }
 
 void compile(char filename[]) {
