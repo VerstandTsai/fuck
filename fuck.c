@@ -13,7 +13,7 @@ void printhelp() {
 
 void printver() {
     printf(
-            "fuck 1.0.0\n"
+            "fuck 1.1.0\n"
             "A Brainfuck compiler.\n"
             "Made by VerstandTsai.\n"
     );
@@ -49,8 +49,9 @@ void compile(char filename[]) {
     );
 
     FILE *src = fopen(filename, "r");
-    int loopcount = 0;
-    int currentloop = -1;
+    int loopcount = -1;
+    int loopstack[100];
+    int loopindex = -1;
     while (!feof(src)) {
         char c = fgetc(src);
         switch (c) {
@@ -69,41 +70,42 @@ void compile(char filename[]) {
             case '.':
                 fprintf(dest,
                         "\tmov dil, [rbp+rbx-memsize]\n"
-                        "\txor eax, eax\n"
+                        "\txor rax, rax\n"
                         "\tcall putchar\n"
                 );
                 break;
             case ',':
                 fprintf(dest,
-                        "\txor eax, eax\n"
+                        "\txor rax, rax\n"
                         "\tcall getchar\n"
                         "\tmov [rbp+rbx-memsize], al\n"
                 );
                 break;
             case '[':
+                loopcount++;
+                loopindex++;
+                loopstack[loopindex] = loopcount;
                 fprintf(dest,
                         "L%d:\n"
                         "\tcmp BYTE PTR [rbp+rbx-memsize], 0\n"
                         "\tje  ENDL%d\n",
                         loopcount, loopcount
                 );
-                loopcount++;
-                currentloop++;
                 break;
             case ']':
                 fprintf(dest,
                         "\tjmp L%d\n"
                         "ENDL%d:\n",
-                        currentloop, currentloop
+                        loopstack[loopindex], loopstack[loopindex]
                 );
-                currentloop--;
+                loopindex--;
                 break;
         }
     }
     fclose(src);
 
     fprintf(dest,
-            "\txor eax, eax\n"
+            "\txor rax, rax\n"
             "\tleave\n"
             "\tret\n"
     );
